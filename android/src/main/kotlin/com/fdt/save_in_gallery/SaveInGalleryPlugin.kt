@@ -1,9 +1,12 @@
 package com.fdt.save_in_gallery
 
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
+import android.os.Environment
 import android.os.Environment.DIRECTORY_PICTURES
 import android.os.Environment.getExternalStoragePublicDirectory
 import androidx.core.app.ActivityCompat
@@ -21,9 +24,9 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class SaveInGalleryPlugin(
-    private val context: Activity
+        private val context: Activity
 ) : MethodCallHandler,
-    PluginRegistry.RequestPermissionsResultListener {
+        PluginRegistry.RequestPermissionsResultListener {
 
     companion object {
 
@@ -44,9 +47,9 @@ class SaveInGalleryPlugin(
     }
 
     data class StoreImageRequest(
-        val method: String,
-        val arguments: Map<String, Any>,
-        val result: Result
+            val method: String,
+            val arguments: Map<String, Any>,
+            val result: Result
     )
 
     private val storeImagesQue = ArrayDeque<StoreImageRequest>()
@@ -56,9 +59,9 @@ class SaveInGalleryPlugin(
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>?,
-        grantResults: IntArray?
+            requestCode: Int,
+            permissions: Array<out String>?,
+            grantResults: IntArray?
     ): Boolean = when (requestCode) {
         STORAGE_PERMISSION_REQUEST -> {
             onStoragePermissionResult(grantResults ?: intArrayOf())
@@ -88,18 +91,14 @@ class SaveInGalleryPlugin(
             return
         }
 
-        val directory = if (directoryName == null || directoryName.isEmpty()) {
-            getExternalStoragePublicDirectory(DIRECTORY_PICTURES)
-        } else {
-            File(getExternalStoragePublicDirectory(DIRECTORY_PICTURES), directoryName)
-        }
-
+        val storePath =  Environment.getExternalStorageDirectory().absolutePath + File.separator + directoryName
+        val directory = File(storePath)
         if (!directory.exists()) {
-            directory.mkdirs()
+            directory.mkdir()
         }
 
         val name =
-            imageName ?: TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()).toString()
+                imageName ?: TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()).toString()
         val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
 
         val formattedName = makeSureNameFormatIsCorrect(name)
@@ -113,6 +112,8 @@ class SaveInGalleryPlugin(
             FileOutputStream(File(directory, formattedName)).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
             }
+            val uri = Uri.fromFile(imageFile)
+            context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
             request.result.success(true)
         } catch (e: IOException) {
             request.result.error("ERROR", "Error while saving image into file: ${e.message}", null)
@@ -159,9 +160,9 @@ class SaveInGalleryPlugin(
                 }
             } catch (e: IOException) {
                 request.result.error(
-                    "ERROR",
-                    "Error while saving image into file: ${e.message}",
-                    null
+                        "ERROR",
+                        "Error while saving image into file: ${e.message}",
+                        null
                 )
             }
         }
@@ -209,9 +210,9 @@ class SaveInGalleryPlugin(
                 }
             } catch (e: IOException) {
                 request.result.error(
-                    "ERROR",
-                    "Error while saving image into file: ${e.message}",
-                    null
+                        "ERROR",
+                        "Error while saving image into file: ${e.message}",
+                        null
                 )
             }
         }
@@ -220,30 +221,30 @@ class SaveInGalleryPlugin(
     }
 
     private fun makeSureNameFormatIsCorrect(name: String): String =
-        when {
-            !name.contains('.') -> "$name.$IMAGE_FILE_EXTENSION"
-            name.substringAfterLast('.', "").isEmpty() ||
-                    !name.substringAfterLast(
-                        '.',
-                        ""
-                    ).equals(IMAGE_FILE_EXTENSION, ignoreCase = true) -> {
-                name.replaceAfterLast('.', IMAGE_FILE_EXTENSION)
+            when {
+                !name.contains('.') -> "$name.$IMAGE_FILE_EXTENSION"
+                name.substringAfterLast('.', "").isEmpty() ||
+                        !name.substringAfterLast(
+                                '.',
+                                ""
+                        ).equals(IMAGE_FILE_EXTENSION, ignoreCase = true) -> {
+                    name.replaceAfterLast('.', IMAGE_FILE_EXTENSION)
+                }
+                else -> name
             }
-            else -> name
-        }
 
     private fun hasWriteStoragePermission(): Boolean =
-        ContextCompat.checkSelfPermission(
-            context,
-            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(
+                    context,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
 
 
     private fun requestStoragePermission() {
         ActivityCompat.requestPermissions(
-            context,
-            arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
-            STORAGE_PERMISSION_REQUEST
+                context,
+                arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                STORAGE_PERMISSION_REQUEST
         )
     }
 
@@ -257,9 +258,9 @@ class SaveInGalleryPlugin(
             while (!storeImagesQue.isEmpty()) {
                 val imageRequest = storeImagesQue.pop()
                 imageRequest.result.error(
-                    "ERROR",
-                    "Saving in gallery error for $imageRequest",
-                    null
+                        "ERROR",
+                        "Saving in gallery error for $imageRequest",
+                        null
                 )
             }
         }
