@@ -57,7 +57,9 @@ public class SwiftSaveInGalleryPlugin: NSObject, FlutterPlugin {
             let dir = params["directoryName"] as? String
             let images = Array(namedImages.values)
             imageSaver.saveImages(images.compactMap({ UIImage(data: $0.data) }), in: dir)
-        } else {
+        } else if call.method == "getAlbumPath" {
+            result("")
+          } else {
             result(FlutterMethodNotImplemented)
         }
     }

@@ -34,6 +34,7 @@ class SaveInGalleryPlugin(
         private const val SAVE_IMAGE_METHOD_KEY = "saveImageKey"
         private const val SAVE_IMAGES_METHOD_KEY = "saveImagesKey"
         private const val SAVE_NAMED_IMAGES_METHOD_KEY = "saveNamedImagesKey"
+        private const val GET_ALBUM_PATH_METHOD_KEY = "getAlbumPath"
         private const val STORAGE_PERMISSION_REQUEST = 3
         private const val IMAGE_FILE_EXTENSION = "PNG"
 
@@ -75,6 +76,7 @@ class SaveInGalleryPlugin(
             SAVE_IMAGE_METHOD_KEY -> onSaveImageCalled(request)
             SAVE_IMAGES_METHOD_KEY -> onSaveImagesCalled(request)
             SAVE_NAMED_IMAGES_METHOD_KEY -> onSaveNamedImagesCalled(request)
+            GET_ALBUM_PATH_METHOD_KEY -> getAlbumPath(request)
             else -> request.result.notImplemented()
         }
     }
@@ -91,7 +93,7 @@ class SaveInGalleryPlugin(
             return
         }
 
-        val storePath =  Environment.getExternalStorageDirectory().absolutePath + File.separator + directoryName
+        val storePath = Environment.getExternalStorageDirectory().absolutePath + File.separator + directoryName
         val directory = File(storePath)
         if (!directory.exists()) {
             directory.mkdir()
@@ -218,6 +220,21 @@ class SaveInGalleryPlugin(
         }
 
         request.result.success(true)
+    }
+
+    private fun getAlbumPath(request: StoreImageRequest): String {
+        if (!hasWriteStoragePermission()) {
+            storeImagesQue.add(request)
+            requestStoragePermission()
+            return ""
+        }
+
+        val storePath = Environment.getExternalStorageDirectory().absolutePath + File.separator + directoryName
+        val directory = File(storePath)
+        if (!directory.exists()) {
+            directory.mkdir()
+        }
+        return storePath
     }
 
     private fun makeSureNameFormatIsCorrect(name: String): String =

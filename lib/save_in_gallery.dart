@@ -11,6 +11,7 @@ class ImageSaver {
   static const String _saveImageMethodKey = "saveImageKey";
   static const String _saveImagesMethodKey = "saveImagesKey";
   static const String _saveNamedImagesMethodKey = "saveNamedImagesKey";
+  static const String _getAlbumPathMethodKey = "getAlbumPath";
 
   /// Saves image in gallery in a selected directory
   /// [name] is optional image file name (Android only, you can't name image files on iOS)
@@ -86,6 +87,14 @@ class ImageSaver {
       return result;
     } on PlatformException {
       return false;
+    }
+  }
+
+  Future<String> getAlbumPath() async {
+    try {
+      return await _platform.invokeMethod(_getAlbumPathMethodKey);
+    } on PlatformException {
+      return "";
     }
   }
 }
