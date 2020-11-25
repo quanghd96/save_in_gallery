@@ -91,9 +91,14 @@ class ImageSaver {
     }
   }
 
-  Future<String> getAlbumPath() async {
+  Future<String> getAlbumPath(String directoryName) async {
     try {
-      return await _platform.invokeMethod(_getAlbumPathMethodKey);
+      return await _platform.invokeMethod(
+        _getAlbumPathMethodKey,
+        {
+          "directoryName": directoryName,
+        },
+      );
     } on PlatformException {
       return "";
     }

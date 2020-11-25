@@ -231,6 +231,8 @@ class SaveInGalleryPlugin(
             return ""
         }
 
+        val directoryName = arguments["directoryName"] as String
+
         val storePath = Environment.getExternalStorageDirectory().absolutePath + File.separator + directoryName
         val directory = File(storePath)
         if (!directory.exists()) {
