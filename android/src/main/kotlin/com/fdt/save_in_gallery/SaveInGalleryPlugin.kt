@@ -245,17 +245,12 @@ class SaveInGalleryPlugin(
         val arguments = request.arguments
         val path = arguments["path"] as String
 
-        if (!hasWriteStoragePermission()) {
-            storeImagesQue.add(request)
-            requestStoragePermission()
-            return
-        }
-
         try {
             val uri = Uri.parse(path)
             context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
             request.result.success(true)
         } catch (e: IOException) {
+            e.printStackTrace()
             request.result.error("ERROR", "Error while saving image into file: ${e.message}", null)
         }
     }
