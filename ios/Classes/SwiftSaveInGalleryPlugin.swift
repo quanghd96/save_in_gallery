@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import Photos
 
 public class SwiftSaveInGalleryPlugin: NSObject, FlutterPlugin {
     var imageSaver: ImageSaver?
@@ -58,7 +59,9 @@ public class SwiftSaveInGalleryPlugin: NSObject, FlutterPlugin {
             let images = Array(namedImages.values)
             imageSaver.saveImages(images.compactMap({ UIImage(data: $0.data) }), in: dir)
         } else if call.method == "getAlbumPath" {
-            result("")
+            let list = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)
+            let path = list[0]
+            result(path)
           } else {
             result(FlutterMethodNotImplemented)
         }
