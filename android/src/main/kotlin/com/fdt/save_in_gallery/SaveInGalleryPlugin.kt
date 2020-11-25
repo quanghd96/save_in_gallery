@@ -246,7 +246,7 @@ class SaveInGalleryPlugin(
         val path = arguments["path"] as String
 
         try {
-            val uri = Uri.parse(path)
+            val uri = Uri.fromFile(File(path))
             context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
             request.result.success(true)
         } catch (e: IOException) {
