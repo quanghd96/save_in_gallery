@@ -35,6 +35,7 @@ class SaveInGalleryPlugin(
         private const val SAVE_IMAGES_METHOD_KEY = "saveImagesKey"
         private const val SAVE_NAMED_IMAGES_METHOD_KEY = "saveNamedImagesKey"
         private const val GET_ALBUM_PATH_METHOD_KEY = "getAlbumPath"
+        private const val SAVE_VIDEO_METHOD_KEY = "saveVideo"
         private const val STORAGE_PERMISSION_REQUEST = 3
         private const val IMAGE_FILE_EXTENSION = "PNG"
 
@@ -77,6 +78,7 @@ class SaveInGalleryPlugin(
             SAVE_IMAGES_METHOD_KEY -> onSaveImagesCalled(request)
             SAVE_NAMED_IMAGES_METHOD_KEY -> onSaveNamedImagesCalled(request)
             GET_ALBUM_PATH_METHOD_KEY -> getAlbumPath(request)
+            SAVE_VIDEO_METHOD_KEY -> saveVideo(request)
             else -> request.result.notImplemented()
         }
     }
@@ -235,6 +237,25 @@ class SaveInGalleryPlugin(
             directory.mkdir()
         }
         return storePath
+    }
+
+    private fun saveVideo(request: StoreImageRequest) {
+        val arguments = request.arguments
+        val path = arguments["path"] as String
+
+        if (!hasWriteStoragePermission()) {
+            storeImagesQue.add(request)
+            requestStoragePermission()
+            return
+        }
+
+        try {
+            val uri = Uri.fromFile(path)
+            context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
+            request.result.success(true)
+        } catch (e: IOException) {
+            request.result.error("ERROR", "Error while saving image into file: ${e.message}", null)
+        }
     }
 
     private fun makeSureNameFormatIsCorrect(name: String): String =

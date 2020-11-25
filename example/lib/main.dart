@@ -28,26 +28,8 @@ class _MyAppState extends State<MyApp> {
 
   /// Fetches image from web and saves in gallery
   Future<void> saveNetworkImage() async {
-    _startLoading();
-    final url =
-        "https://solarsystem.nasa.gov/system/downloadable_items/519_solsticeflare.jpg";
-    final image = NetworkImage(url);
-    final key = await image.obtainKey(ImageConfiguration());
-    final load = image.load(key);
-    load.addListener(
-      ImageStreamListener((listener, err) async {
-        final byteData =
-            await listener.image.toByteData(format: ImageByteFormat.png);
-        final bytes = byteData.buffer.asUint8List();
-        final res = await _imageSaver.saveImage(
-          imageBytes: bytes,
-          directoryName: "dir_name",
-        );
-        _stopLoading();
-        _displayResult(res);
-        print(res);
-      }),
-    );
+    final path = await _imageSaver.getAlbumPath();
+    print(path);
   }
 
   /// Saves one of asset images to gallery
