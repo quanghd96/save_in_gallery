@@ -230,7 +230,7 @@ class SaveInGalleryPlugin(
             requestStoragePermission()
             return ""
         }
-
+        val arguments = request.arguments
         val directoryName = arguments["directoryName"] as String
 
         val storePath = Environment.getExternalStorageDirectory().absolutePath + File.separator + directoryName
