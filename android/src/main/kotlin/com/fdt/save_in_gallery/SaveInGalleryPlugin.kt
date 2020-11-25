@@ -224,11 +224,11 @@ class SaveInGalleryPlugin(
         request.result.success(true)
     }
 
-    private fun getAlbumPath(request: StoreImageRequest): String {
+    private fun getAlbumPath(request: StoreImageRequest) {
         if (!hasWriteStoragePermission()) {
             storeImagesQue.add(request)
             requestStoragePermission()
-            return ""
+            return
         }
         val arguments = request.arguments
         val directoryName = arguments["directoryName"] as String
@@ -238,7 +238,7 @@ class SaveInGalleryPlugin(
         if (!directory.exists()) {
             directory.mkdir()
         }
-        return storePath
+        request.result.success(storePath)
     }
 
     private fun saveVideo(request: StoreImageRequest) {
