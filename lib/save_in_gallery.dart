@@ -12,6 +12,7 @@ class ImageSaver {
   static const String _saveImagesMethodKey = "saveImagesKey";
   static const String _saveNamedImagesMethodKey = "saveNamedImagesKey";
   static const String _getAlbumPathMethodKey = "getAlbumPath";
+  static const String _saveVideoMethodKey = "saveVideo";
 
   /// Saves image in gallery in a selected directory
   /// [name] is optional image file name (Android only, you can't name image files on iOS)
@@ -93,6 +94,20 @@ class ImageSaver {
   Future<String> getAlbumPath() async {
     try {
       return await _platform.invokeMethod(_getAlbumPathMethodKey);
+    } on PlatformException {
+      return "";
+    }
+  }
+
+  Future saveVideo(String videoPath, String directoryName) async {
+    try {
+      return await _platform.invokeMethod(
+        _saveVideoMethodKey,
+        {
+          "directoryName": directoryName,
+          "path": videoPath,
+        },
+      );
     } on PlatformException {
       return "";
     }
